@@ -78,7 +78,14 @@ vec4 calculerReflexion( in vec3 L, in vec3 N, in vec3 O )
     //color.rgb = FrontMaterial.diffuse.rgb * LightSource.diffuse.rgb * max(dot(N,L), 0.);
     color += FrontMaterial.diffuse * LightSource.diffuse * max(dot(N,L), 0.);
     // composante spéculaire
-    color += FrontMaterial.specular * LightSource.specular * pow(max(dot(reflect(-L,N),O),0.), FrontMaterial.shininess);
+    if (utiliseBlinn)
+    {
+        color += FrontMaterial.specular * LightSource.specular * pow(max(dot(normalize(L+O),N),0.), FrontMaterial.shininess);
+    }
+    else
+    {
+        color += FrontMaterial.specular * LightSource.specular * pow(max(dot(reflect(-L,N),O),0.), FrontMaterial.shininess);
+    }
     // composante ambiante
     color += FrontMaterial.ambient * LightSource.ambient;
 
@@ -101,7 +108,7 @@ void main( void )
        AttribsOut.couleur = vec4(0., 0., 0., 1.);
        for(int i=0; i<2; i++)
        {
-           vec3 L = normalize(vec3(MV*LightSource.position[i]) - pos); // position
+           vec3 L = normalize(vec3(matrVisu*LightSource.position[i]) - pos); // car la position des lumieres est deja dans le repere du monde
            // couleur du sommet
            AttribsOut.couleur += calculerReflexion( L, N, O );
        }
