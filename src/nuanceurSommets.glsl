@@ -60,7 +60,8 @@ layout(location=8) in vec4 TexCoord;
 
 out Attribs {
    vec4 couleur;
-   vec3 Normal;
+   vec3 normal;
+   vec3 pos;
 } AttribsOut;
 
 float calculerSpot( in vec3 D, in vec3 L )
@@ -91,11 +92,9 @@ void main( void )
 
    mat4 MV = matrVisu * matrModel;
    vec3 pos = vec3(MV * Vertex); // position du vertex courant dans la base view
+   vec3 O = normalize(-pos); // dans la base view, la camera est a la position (0,0,0)
+   vec3 N = normalize( matrNormale * Normal ); // calcul de la normale normalisée
 
-   vec3 O = normalize(-pos); // dans la base view, on est a la position (0,0,0)
-   // calcul de la normale normalisée
-   vec3 N = normalize( matrNormale * Normal );
-   AttribsOut.Normal = N;
 
    if (typeIllumination == 0)
    {
@@ -110,5 +109,11 @@ void main( void )
        //emission
        AttribsOut.couleur += FrontMaterial.emission + LightModel.ambient*FrontMaterial.ambient;
        AttribsOut.couleur = clamp(AttribsOut.couleur, 0., 1.);
+   }
+   else
+   {
+       // on passe la normale au fragment shader avec phong pour effectuer une interpolation des normales
+       AttribsOut.normal = N;
+       AttribsOut.pos = pos;
    }
 }

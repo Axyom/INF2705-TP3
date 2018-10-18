@@ -48,11 +48,15 @@ layout (std140) uniform varsUnif
 
 uniform sampler2D laTexture;
 
+uniform mat4 matrModel;
+uniform mat4 matrVisu;
+
 /////////////////////////////////////////////////////////////////
 
 in Attribs {
    vec4 couleur;
-   vec3 Normal;
+   vec3 normal;
+   vec3 pos;
 } AttribsIn;
 
 out vec4 FragColor;
@@ -65,19 +69,43 @@ float calculerSpot( in vec3 D, in vec3 L )
 
 vec4 calculerReflexion( in vec3 L, in vec3 N, in vec3 O )
 {
-   vec4 grisUniforme = vec4(0.7,0.7,0.7,1.0);
-   return( grisUniforme );
+    vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
+
+    // composante diffuse
+    //color.rgb = FrontMaterial.diffuse.rgb * LightSource.diffuse.rgb * max(dot(N,L), 0.);
+    color += FrontMaterial.diffuse * LightSource.diffuse * max(dot(N,L), 0.);
+    // composante spéculaire
+    color += FrontMaterial.specular * LightSource.specular * pow(max(dot(reflect(-L,N),O),0.), FrontMaterial.shininess);
+    // composante ambiante
+    color += FrontMaterial.ambient * LightSource.ambient;
+
+    return color;
 }
 
 void main( void )
 {
-   // ...
-
    // assigner la couleur finale
-   FragColor = AttribsIn.couleur;
+   if (typeIllumination == 0) // gouraud
+   {
+       FragColor = AttribsIn.couleur;
+   }
+   else // phong
+   {
+       mat4 MV = matrVisu * matrModel;
+       vec3 O = normalize(-AttribsIn.pos); // dans la base view, on est a la position (0,0,0)
+       vec3 N = AttribsIn.normal;
 
-   // vec4 coul = calculerReflexion( L, N, O );
-   // ...
+       FragColor = vec4(0.,0.,0.,1.);
 
-   //if ( afficheNormales ) FragColor = vec4(N,1.0);
+       for(int i=0; i<2; i++)
+       {
+           vec3 L = normalize(vec3(MV*LightSource.position[i]) - AttribsIn.pos); // position
+           // couleur du sommet
+           FragColor += calculerReflexion( L, N, O );
+       }
+
+       //emission
+       FragColor += FrontMaterial.emission + LightModel.ambient*FrontMaterial.ambient;
+       FragColor = clamp(FragColor, 0., 1.);
+   }
 }
