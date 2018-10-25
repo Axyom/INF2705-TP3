@@ -64,27 +64,44 @@ out vec4 FragColor;
 float calculerSpot( in vec3 D, in vec3 L )
 {
    float spotFacteur = 1.0;
+   float cosGamma = max(0., dot(D, L));
+   float cosDelta = cos(radians(LightSource.spotAngleOuverture));
+   float c = LightSource.spotExponent;
+
+   if (utiliseDirect)
+   {
+       spotFacteur = smoothstep(pow(cosDelta, 1.01+(c/2.0)), cosDelta,  cosGamma);
+   }
+   else // Opengl
+   {
+       (cosGamma > cosDelta) ? (spotFacteur = pow(cosGamma, c)):(spotFacteur = 0.0);
+   }
+
    return( spotFacteur );
 }
 
 vec4 calculerReflexion( in vec3 L, in vec3 N, in vec3 O )
 {
     vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
+    float NdotL = dot(N,L);
 
-    // composante diffuse
-    //color.rgb = FrontMaterial.diffuse.rgb * LightSource.diffuse.rgb * max(dot(N,L), 0.);
-    color += FrontMaterial.diffuse * LightSource.diffuse * max(dot(N,L), 0.);
-    // composante spéculaire
-    if (utiliseBlinn)
+    if (NdotL > 0.0)
     {
-        color += FrontMaterial.specular * LightSource.specular * pow(max(dot(normalize(L+O),N),0.), FrontMaterial.shininess);
+        // composante diffuse
+        color += FrontMaterial.diffuse * LightSource.diffuse * NdotL;
+
+        // composante spéculaire
+        if (utiliseBlinn)
+        {
+            color += FrontMaterial.specular * LightSource.specular * pow(max(dot(normalize(L+O),N),0.), FrontMaterial.shininess);
+        }
+        else
+        {
+            color += FrontMaterial.specular * LightSource.specular * pow(max(dot(reflect(-L,N),O),0.), FrontMaterial.shininess);
+        }
+        // composante ambiante
+        color += FrontMaterial.ambient * LightSource.ambient;
     }
-    else
-    {
-        color += FrontMaterial.specular * LightSource.specular * pow(max(dot(reflect(-L,N),O),0.), FrontMaterial.shininess);
-    }
-    // composante ambiante
-    color += FrontMaterial.ambient * LightSource.ambient;
 
     return color;
 }
@@ -108,7 +125,8 @@ void main( void )
        {
            vec3 L = normalize(vec3(matrVisu*LightSource.position[i]) - AttribsIn.pos); // car la position des lumieres est deja dans le repere du monde
            // couleur du sommet
-           FragColor += calculerReflexion( L, N, O );
+           vec3 D = normalize(transpose(inverse(mat3(matrVisu)))*(-LightSource.spotDirection[i]));
+           FragColor += calculerReflexion( L, N, O ) * calculerSpot(D, L);
        }
 
        //emission
