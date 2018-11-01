@@ -57,6 +57,7 @@ in Attribs {
    vec4 couleur;
    vec3 normal;
    vec3 pos;
+   vec2 texCoords;
 } AttribsIn;
 
 out vec4 FragColor;
@@ -108,29 +109,71 @@ vec4 calculerReflexion( in vec3 L, in vec3 N, in vec3 O )
 
 void main( void )
 {
-   // assigner la couleur finale
-   if (typeIllumination == 0) // gouraud
-   {
-       FragColor = AttribsIn.couleur;
-   }
-   else // phong
-   {
-       mat4 MV = matrVisu * matrModel;
-       vec3 O = normalize(-AttribsIn.pos); // dans la base view, on est a la position (0,0,0)
-       vec3 N = AttribsIn.normal;
+    // switch(afficheTexelFonce)
+    // {
+    //     case 0:
+    //     break;
+    //     case 1:
+    //     break;
+    //     case 2:
+    //     {
+    //         vec3 threshold = vec3(0.5);
+    //
+    //         if(all(lessThan(FragColor.rgb, threshold)))
+    //         {
+    //             discard;
+    //         }
+    //     }
+    //     break;
+    //     default:
+    //     break;
+    // }
 
-       FragColor = vec4(0.,0.,0.,1.);
+    // assigner la couleur finale
+    if (typeIllumination == 0) // gouraud
+    {
+        FragColor = AttribsIn.couleur;
+    }
+    else // phong
+    {
+        mat4 MV = matrVisu * matrModel;
+        vec3 O = normalize(-AttribsIn.pos); // dans la base view, on est a la position (0,0,0)
+        vec3 N = AttribsIn.normal;
 
-       for(int i=0; i<2; i++)
-       {
-           vec3 L = normalize(vec3(matrVisu*LightSource.position[i]) - AttribsIn.pos); // car la position des lumieres est deja dans le repere du monde
-           // couleur du sommet
-           vec3 D = normalize(transpose(inverse(mat3(matrVisu)))*(-LightSource.spotDirection[i]));
-           FragColor += calculerReflexion( L, N, O ) * calculerSpot(D, L);
-       }
+        FragColor = vec4(0.,0.,0.,1.);
 
-       //emission
-       FragColor += FrontMaterial.emission + LightModel.ambient*FrontMaterial.ambient;
-       FragColor = clamp(FragColor, 0., 1.);
-   }
+        for(int i=0; i<2; i++)
+        {
+            vec3 L = normalize(vec3(matrVisu*LightSource.position[i]) - AttribsIn.pos); // car la position des lumieres est deja dans le repere du monde
+            // couleur du sommet
+            vec3 D = normalize(transpose(inverse(mat3(matrVisu)))*(-LightSource.spotDirection[i]));
+            FragColor += calculerReflexion( L, N, O ) * calculerSpot(D, L);
+        }
+
+        //emission
+        FragColor += FrontMaterial.emission + LightModel.ambient*FrontMaterial.ambient;
+        FragColor = clamp(FragColor, 0., 1.);
+    }
+
+    if (texnumero != 0)
+    {
+        vec4 texColor = texture(laTexture, AttribsIn.texCoords);
+
+        vec3 grey = vec3(0.5);
+
+        if(afficheTexelFonce != 0)
+        {
+            if (all(lessThan(texColor.rgb, grey)))
+            {
+                if(afficheTexelFonce == 2)
+                    discard;
+                else if (afficheTexelFonce == 1)
+                {
+                    texColor.rgb = grey;
+                }
+            }
+        }
+
+        FragColor *= texColor;
+    }
 }

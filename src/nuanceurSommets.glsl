@@ -62,6 +62,7 @@ out Attribs {
    vec4 couleur;
    vec3 normal;
    vec3 pos;
+   vec2 texCoords;
 } AttribsOut;
 
 float calculerSpot( in vec3 D, in vec3 L )
@@ -96,6 +97,7 @@ void main( void )
 {
    // transformation standard du sommet
    gl_Position = matrProj * matrVisu * matrModel * Vertex;
+   AttribsOut.texCoords = TexCoord.st;
 
    mat4 MV = matrVisu * matrModel;
    vec3 pos = vec3(MV * Vertex); // position du vertex courant dans la base view

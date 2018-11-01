@@ -398,6 +398,7 @@ void FenetreTP::initialiser()
    /*       4+-----------+5         */
    /*             +Z                */
 
+
    GLfloat sommets[3*4*6] =
    {
       -1.0,  1.0, -1.0,    1.0,  1.0, -1.0,  -1.0, -1.0, -1.0,    1.0, -1.0, -1.0,   // P3,P2,P0,P1
@@ -407,15 +408,117 @@ void FenetreTP::initialiser()
       -1.0, -1.0,  1.0,   -1.0,  1.0,  1.0,  -1.0, -1.0, -1.0,   -1.0,  1.0, -1.0,   // P4,P7,P0,P3
       -1.0, -1.0,  1.0,    1.0, -1.0,  1.0,  -1.0,  1.0,  1.0,    1.0,  1.0,  1.0    // P4,P5,P7,P6
    };
+   # warning "changer code normales"
    GLfloat normales[3*4*6] =
    {
-            0.0,  0.0,  -1.0, 0.0,  0.0,  -1.0, 0.0,  0.0,  -1.0, 0.0,  0.0,  -1.0,
-	        0.0,  -1.0, 0.0,  0.0,  -1.0, 0.0,  0.0,  -1.0, 0.0,  0.0,  -1.0, 0.0,
-	        1.0,  0.0,  0.0,  1.0,  0.0,  0.0,  1.0,  0.0,  0.0,  1.0,  0.0,  0.0,
-	        0.0,  1.0,  0.0,  0.0,  1.0,  0.0,  0.0,  1.0,  0.0,  0.0,  1.0,  0.0,
-	        -1.0, 0.0,  0.0,  -1.0, 0.0,  0.0,  -1.0, 0.0,  0.0,  -1.0, 0.0,  0.0,
-            0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0
+        0.0,  0.0,  -1.0, 0.0,  0.0,  -1.0, 0.0,  0.0,  -1.0, 0.0,  0.0,  -1.0,
+        0.0,  -1.0, 0.0,  0.0,  -1.0, 0.0,  0.0,  -1.0, 0.0,  0.0,  -1.0, 0.0,
+        1.0,  0.0,  0.0,  1.0,  0.0,  0.0,  1.0,  0.0,  0.0,  1.0,  0.0,  0.0,
+        0.0,  1.0,  0.0,  0.0,  1.0,  0.0,  0.0,  1.0,  0.0,  0.0,  1.0,  0.0,
+        -1.0, 0.0,  0.0,  -1.0, 0.0,  0.0,  -1.0, 0.0,  0.0,  -1.0, 0.0,  0.0,
+        0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0
    };
+
+   GLfloat texCoordsDe[2*4*6] =
+   {
+        // face 6 sur P3,P2,P0,P1
+        1.0, 1.0/3.0, //3
+        2.0/3.0, 1.0/3.0, //2
+        1.0, 0.0, //0
+        2.0/3.0, 0.0, //1
+        // face 3 sur P5,P4,P1,P0
+        2.0/3.0, 1.0/3.0, //5
+        1.0/3.0, 1.0/3.0, //4
+        2.0/3.0, 0.0, //1
+        1.0/3.0, 0.0, //0
+        // face 5 sur P6,P5,P2,P1
+        2.0/3.0, 2.0/3.0, //6
+        2.0/3.0, 1.0/3.0, //5
+        1.0, 2.0/3.0, //2
+        1.0, 1.0/3.0, //1
+        // face 4 sur P7,P6,P3,P2
+        1.0/3.0, 2.0/3.0, //7
+        2.0/3.0, 2.0/3.0, //6
+        1.0/3.0, 1.0, //3
+        2.0/3.0, 1.0, //2
+        //face 1 sur P4 P5 P7 P6
+        1.0/3.0, 1.0/3.0, //4
+        2.0/3.0, 1.0/3.0, //5
+        1.0/3.0, 2.0/3.0, //7
+        2.0/3.0, 2.0/3.0, //6
+        //face 2 sur P4 P7 P0 P3
+        1.0/3.0, 1.0/3.0, //4
+        1.0/3.0, 2.0/3.0, //7
+        0.0, 1.0/3.0, //0
+        0.0, 2.0/3.0 //3
+   };
+
+    GLfloat texCoordsEchec[2*4*6]=
+    {
+        //on repete la texture 3 fois dans les deux directions sur toutes les faces
+        0.0, 0.0,
+        3.0, 0.0,
+        0.0, 3.0,
+        3.0, 3.0,
+
+        0.0, 0.0,
+        3.0, 0.0,
+        0.0, 3.0,
+        3.0, 3.0,
+
+        0.0, 0.0,
+        3.0, 0.0,
+        0.0, 3.0,
+        3.0, 3.0,
+
+        0.0, 0.0,
+        3.0, 0.0,
+        0.0, 3.0,
+        3.0, 3.0,
+
+        0.0, 0.0,
+        3.0, 0.0,
+        0.0, 3.0,
+        3.0, 3.0,
+
+        0.0, 0.0,
+        3.0, 0.0,
+        0.0, 3.0,
+        3.0, 3.0
+    };
+
+    GLfloat texCoordsMm[2*4*6]=
+    {
+        0.0, 0.0,
+        1.0, 0.0,
+        0.0, 1.0,
+        1.0, 1.0,
+
+        0.0, 0.0,
+        1.0, 0.0,
+        0.0, 1.0,
+        1.0, 1.0,
+
+        0.0, 0.0,
+        1.0, 0.0,
+        0.0, 1.0,
+        1.0, 1.0,
+
+        0.0, 0.0,
+        1.0, 0.0,
+        0.0, 1.0,
+        1.0, 1.0,
+
+        0.0, 0.0,
+        1.0, 0.0,
+        0.0, 1.0,
+        1.0, 1.0,
+
+        0.0, 0.0,
+        1.0, 0.0,
+        0.0, 1.0,
+        1.0, 1.0
+    };
 
 
    // // calcul automatique des normales
@@ -466,7 +569,12 @@ void FenetreTP::initialiser()
    glVertexAttribPointer( locNormal, 3, GL_FLOAT, GL_FALSE, 0, 0 );
    glEnableVertexAttribArray(locNormal);
    // partie 3: charger le VBO pour les coordonnées de texture
-   // ...
+   glBindBuffer( GL_ARRAY_BUFFER, vbo[2] ); // DE
+   glBufferData( GL_ARRAY_BUFFER, sizeof(texCoordsDe), texCoordsDe, GL_STATIC_DRAW );
+   glBindBuffer( GL_ARRAY_BUFFER, vbo[3] ); //Echiquier
+   glBufferData( GL_ARRAY_BUFFER, sizeof(texCoordsEchec), texCoordsEchec, GL_STATIC_DRAW );
+   glBindBuffer( GL_ARRAY_BUFFER, vbo[4] ); //Metal et mosaique
+   glBufferData( GL_ARRAY_BUFFER, sizeof(texCoordsMm), texCoordsMm, GL_STATIC_DRAW );
 
    glBindVertexArray(0);
 
@@ -507,6 +615,7 @@ void FenetreTP::conclure()
 void afficherModele()
 {
    // partie 3: paramètres de texture
+   glBindVertexArray( vao[0] );
    switch ( varsUnif.texnumero )
    {
    default:
@@ -514,16 +623,48 @@ void afficherModele()
       break;
    case 1:
       //std::cout << "Texture 1 DE" << std::endl;
+      glBindTexture( GL_TEXTURE_2D, textures[0] );
+
+      glBindBuffer( GL_ARRAY_BUFFER, vbo[2] );
+      glVertexAttribPointer( locTexCoord, 2, GL_FLOAT, GL_FALSE, 0, 0 );
+      glEnableVertexAttribArray(locTexCoord);
       break;
    case 2:
       //std::cout << "Texture 2 ECHIQUIER" << std::endl;
+      glBindTexture( GL_TEXTURE_2D, textures[1] );
+
+      glBindBuffer( GL_ARRAY_BUFFER, vbo[3] );
+      glVertexAttribPointer( locTexCoord, 2, GL_FLOAT, GL_FALSE, 0, 0 );
+      glEnableVertexAttribArray(locTexCoord);
       break;
    case 3:
       //std::cout << "Texture 3 METAL" << std::endl;
+      glBindTexture( GL_TEXTURE_2D, textures[2] );
+
+      glBindBuffer( GL_ARRAY_BUFFER, vbo[4] );
+      glVertexAttribPointer( locTexCoord, 2, GL_FLOAT, GL_FALSE, 0, 0 );
+      glEnableVertexAttribArray(locTexCoord);
       break;
    case 4:
       //std::cout << "Texture 4 MOSAIQUE" << std::endl;
+      glBindTexture( GL_TEXTURE_2D, textures[3] );
+
+      glBindBuffer( GL_ARRAY_BUFFER, vbo[4] );
+      glVertexAttribPointer( locTexCoord, 2, GL_FLOAT, GL_FALSE, 0, 0 );
+      glEnableVertexAttribArray(locTexCoord);
       break;
+   }
+
+   glBindBuffer( GL_ARRAY_BUFFER, 0 );
+   glBindVertexArray( 0 );
+
+   if (!varsUnif.utiliseCouleur)
+   {
+       FrontMaterial.diffuse = glm::vec4( 0.7, 0.7, 0.7, 1.0 );
+   }
+   else
+   {
+       FrontMaterial.diffuse = glm::vec4( 1.0, 0.1, 1.0, 1.0 );
    }
 
    // Dessiner le modèle
