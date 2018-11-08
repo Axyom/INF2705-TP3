@@ -1,5 +1,25 @@
 #version 410
 
+// ==> Les variables en commentaires ci-dessous sont déclarées implicitement:
+// in vec3 gl_TessCoord;
+// in int gl_PatchVerticesIn;
+// in int gl_PrimitiveID;
+// patch in float gl_TessLevelOuter[4];
+// patch in float gl_TessLevelInner[2];
+// in gl_PerVertex
+// {
+//   vec4 gl_Position;
+//   float gl_PointSize;
+//   float gl_ClipDistance[];
+// } gl_in[gl_MaxPatchVertices];
+
+// out gl_PerVertex
+// {
+//   vec4 gl_Position;
+//   float gl_PointSize;
+//   float gl_ClipDistance[];
+// };
+
 // Définition des paramètres des sources de lumière
 layout (std140) uniform LightSourceParameters
 {
@@ -51,19 +71,50 @@ uniform mat4 matrVisu;
 uniform mat4 matrProj;
 uniform mat3 matrNormale;
 
-/////////////////////////////////////////////////////////////////
+layout(quads) in;
 
-layout(location=0) in vec4 Vertex;
-layout(location=2) in vec3 Normal;
-layout(location=3) in vec4 Color;
-layout(location=8) in vec4 TexCoord;
-
-out Attribs {
+in Attribs {
    vec4 couleur;
    vec3 normal;
-   vec3 pos;
-   vec2 texCoords;
+   vec4 pos;
+   vec4 texCoords;
+} AttribsIn[];
+
+out Attribs {
+    vec4 couleur;
+    vec3 normal;
+    vec3 pos;
+    vec2 texCoords;
 } AttribsOut;
+
+float interpole( float v0, float v1, float v2, float v3 )
+{
+   // mix( x, y, f ) = x * (1-f) + y * f.
+   float v01 = mix( v0, v1, gl_TessCoord.x );
+   float v32 = mix( v3, v2, gl_TessCoord.x );
+   return mix( v01, v32, gl_TessCoord.y );
+}
+vec2 interpole( vec2 v0, vec2 v1, vec2 v2, vec2 v3 )
+{
+   // mix( x, y, f ) = x * (1-f) + y * f.
+   vec2 v01 = mix( v0, v1, gl_TessCoord.x );
+   vec2 v32 = mix( v3, v2, gl_TessCoord.x );
+   return mix( v01, v32, gl_TessCoord.y );
+}
+vec3 interpole( vec3 v0, vec3 v1, vec3 v2, vec3 v3 )
+{
+   // mix( x, y, f ) = x * (1-f) + y * f.
+   vec3 v01 = mix( v0, v1, gl_TessCoord.x );
+   vec3 v32 = mix( v3, v2, gl_TessCoord.x );
+   return mix( v01, v32, gl_TessCoord.y );
+}
+vec4 interpole( vec4 v0, vec4 v1, vec4 v2, vec4 v3 )
+{
+   // mix( x, y, f ) = x * (1-f) + y * f.
+   vec4 v01 = mix( v0, v1, gl_TessCoord.x );
+   vec4 v32 = mix( v3, v2, gl_TessCoord.x );
+   return mix( v01, v32, gl_TessCoord.y );
+}
 
 float calculerSpot( in vec3 D, in vec3 L )
 {
@@ -93,8 +144,14 @@ vec4 calculerReflexion( in vec3 L, in vec3 N, in vec3 O )
     return color;
 }
 
-void main( void )
+void main()
 {
+    // on substitue les donnees precedemment utilisees dans le vertex shader par celles fournies par la generation de tesselation
+   vec4 Color = interpole( AttribsIn[0].couleur, AttribsIn[1].couleur, AttribsIn[3].couleur, AttribsIn[2].couleur );
+   vec3 Normal = interpole( AttribsIn[0].normal, AttribsIn[1].normal, AttribsIn[3].normal, AttribsIn[2].normal );
+   vec4 Vertex = interpole( AttribsIn[0].pos, AttribsIn[1].pos, AttribsIn[3].pos, AttribsIn[2].pos );
+   vec4 TexCoord = interpole( AttribsIn[0].texCoords, AttribsIn[1].texCoords, AttribsIn[3].texCoords, AttribsIn[2].texCoords );
+
    // transformation standard du sommet
    gl_Position = matrProj * matrVisu * matrModel * Vertex;
    AttribsOut.texCoords = TexCoord.st;

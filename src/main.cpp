@@ -253,19 +253,20 @@ void chargerNuanceurs()
       // créer le programme
       prog = glCreateProgram();
 
-      // attacher le nuanceur de sommets
-      const GLchar *chainesSommets = ProgNuanceur::lireNuanceur( "nuanceurSommets.glsl" );
-      if ( chainesSommets != NULL )
-      {
-         GLuint nuanceurObj = glCreateShader( GL_VERTEX_SHADER );
-         glShaderSource( nuanceurObj, 1, &chainesSommets, NULL );
-         glCompileShader( nuanceurObj );
-         glAttachShader( prog, nuanceurObj );
-         ProgNuanceur::afficherLogCompile( nuanceurObj );
-         delete [] chainesSommets;
-      }
       if ( Etat::utiliseTess )
       {
+          // attacher le nuanceur de sommets version Tesselation
+          const GLchar *chainesSommets = ProgNuanceur::lireNuanceur( "nuanceurSommetsTess.glsl" );
+          if ( chainesSommets != NULL )
+          {
+             GLuint nuanceurObj = glCreateShader( GL_VERTEX_SHADER );
+             glShaderSource( nuanceurObj, 1, &chainesSommets, NULL );
+             glCompileShader( nuanceurObj );
+             glAttachShader( prog, nuanceurObj );
+             ProgNuanceur::afficherLogCompile( nuanceurObj );
+             delete [] chainesSommets;
+          }
+
          // partie 4: À ACTIVER (touche '9')
          // attacher le nuanceur de controle de la tessellation
          const GLchar *chainesTessCtrl = ProgNuanceur::lireNuanceur( "nuanceurTessCtrl.glsl" );
@@ -290,6 +291,21 @@ void chargerNuanceurs()
             delete [] chainesTessEval;
          }
       }
+      else
+      {
+          // attacher le nuanceur de sommets
+          const GLchar *chainesSommets = ProgNuanceur::lireNuanceur( "nuanceurSommets.glsl" );
+          if ( chainesSommets != NULL )
+          {
+             GLuint nuanceurObj = glCreateShader( GL_VERTEX_SHADER );
+             glShaderSource( nuanceurObj, 1, &chainesSommets, NULL );
+             glCompileShader( nuanceurObj );
+             glAttachShader( prog, nuanceurObj );
+             ProgNuanceur::afficherLogCompile( nuanceurObj );
+             delete [] chainesSommets;
+          }
+      }
+
       // attacher le nuanceur de fragments
       const GLchar *chainesFragments = ProgNuanceur::lireNuanceur( "nuanceurFragments.glsl" );
       if ( chainesFragments != NULL )
@@ -318,7 +334,7 @@ void chargerNuanceurs()
       // partie 4:
       if ( Etat::utiliseTess )
       {
-         if ( ( locfacteurDeform = glGetUniformLocation( prog, "facteurDeform" ) ) == -1 ) std::cerr << "!!! pas trouvé la \"Location\" de facteurDeform" << std::endl;
+         //if ( ( locfacteurDeform = glGetUniformLocation( prog, "facteurDeform" ) ) == -1 ) std::cerr << "!!! pas trouvé la \"Location\" de facteurDeform" << std::endl;
          if ( ( locTessLevelInner = glGetUniformLocation( prog, "TessLevelInner" ) ) == -1 ) std::cerr << "!!! pas trouvé la \"Location\" de TessLevelInner (partie 4)" << std::endl;
          if ( ( locTessLevelOuter = glGetUniformLocation( prog, "TessLevelOuter" ) ) == -1 ) std::cerr << "!!! pas trouvé la \"Location\" de TessLevelOuter (partie 4)" << std::endl;
       }
@@ -688,6 +704,7 @@ void afficherModele()
          if ( Etat::utiliseTess )
          {
             // partie 4: afficher le cube avec des GL_PATCHES
+            glDrawArrays( GL_PATCHES, 0, 4*6 );
          }
          else
          {
@@ -842,7 +859,7 @@ void FenetreTP::afficherScene()
    glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
    //glActiveTexture( GL_TEXTURE0 ); // activer la texture '0' (valeur de défaut)
    glUniform1i( loclaTexture, 0 ); // '0' => utilisation de GL_TEXTURE0
-   glUniform1f( locfacteurDeform, Etat::facteurDeform );
+   //glUniform1f( locfacteurDeform, Etat::facteurDeform );
    glUniform1f( locTessLevelInner, Etat::TessLevelInner );
    glUniform1f( locTessLevelOuter, Etat::TessLevelOuter );
 
