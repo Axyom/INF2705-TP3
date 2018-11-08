@@ -118,8 +118,21 @@ vec4 interpole( vec4 v0, vec4 v1, vec4 v2, vec4 v3 )
 
 float calculerSpot( in vec3 D, in vec3 L )
 {
-   float spotFacteur = 1.0;
-   return( spotFacteur );
+    float spotFacteur = 1.0;
+    float cosGamma = max(0., dot(D, L));
+    float cosDelta = cos(radians(LightSource.spotAngleOuverture));
+    float c = LightSource.spotExponent;
+
+    if (utiliseDirect)
+    {
+        spotFacteur = smoothstep(pow(cosDelta, 1.01+(c/2.0)), cosDelta,  cosGamma);
+    }
+    else // Opengl
+    {
+        (cosGamma > cosDelta) ? (spotFacteur = pow(cosGamma, c)):(spotFacteur = 0.0);
+    }
+
+    return( spotFacteur );
 }
 
 vec4 calculerReflexion( in vec3 L, in vec3 N, in vec3 O )
@@ -162,7 +175,7 @@ void main()
    vec3 N = normalize( matrNormale * Normal ); // calcul de la normale normalisée
 
 
-   if (typeIllumination == 0)
+   if (typeIllumination == 0) // gouraud
    {
        AttribsOut.couleur = vec4(0., 0., 0., 1.);
        for(int i=0; i<2; i++)
@@ -177,7 +190,7 @@ void main()
        AttribsOut.couleur += FrontMaterial.emission + LightModel.ambient*FrontMaterial.ambient;
        AttribsOut.couleur = clamp(AttribsOut.couleur, 0., 1.);
    }
-   else
+   else // phong
    {
        // on passe la normale au fragment shader avec phong pour effectuer une interpolation des normales
        AttribsOut.normal = N;

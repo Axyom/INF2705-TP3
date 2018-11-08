@@ -132,7 +132,7 @@ void main( void )
     // assigner la couleur finale
     if (typeIllumination == 0) // gouraud
     {
-        FragColor = AttribsIn.couleur;
+        FragColor = AttribsIn.couleur ;
     }
     else // phong
     {

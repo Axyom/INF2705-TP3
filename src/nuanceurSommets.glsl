@@ -67,8 +67,21 @@ out Attribs {
 
 float calculerSpot( in vec3 D, in vec3 L )
 {
-   float spotFacteur = 1.0;
-   return( spotFacteur );
+    float spotFacteur = 1.0;
+    float cosGamma = max(0., dot(D, L));
+    float cosDelta = cos(radians(LightSource.spotAngleOuverture));
+    float c = LightSource.spotExponent;
+
+    if (utiliseDirect)
+    {
+        spotFacteur = smoothstep(pow(cosDelta, 1.01+(c/2.0)), cosDelta,  cosGamma);
+    }
+    else // Opengl
+    {
+        (cosGamma > cosDelta) ? (spotFacteur = pow(cosGamma, c)):(spotFacteur = 0.0);
+    }
+
+    return( spotFacteur );
 }
 
 vec4 calculerReflexion( in vec3 L, in vec3 N, in vec3 O )
@@ -93,7 +106,7 @@ vec4 calculerReflexion( in vec3 L, in vec3 N, in vec3 O )
     return color;
 }
 
-void main( void )
+void main( void ) // gouraud
 {
    // transformation standard du sommet
    gl_Position = matrProj * matrVisu * matrModel * Vertex;
@@ -120,7 +133,7 @@ void main( void )
        AttribsOut.couleur += FrontMaterial.emission + LightModel.ambient*FrontMaterial.ambient;
        AttribsOut.couleur = clamp(AttribsOut.couleur, 0., 1.);
    }
-   else
+   else // Phong
    {
        // on passe la normale au fragment shader avec phong pour effectuer une interpolation des normales
        AttribsOut.normal = N;
